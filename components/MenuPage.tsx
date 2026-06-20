@@ -102,7 +102,6 @@ export const MenuPage: React.FC<MenuPageProps> = ({
                     // z-index ensures hit-testing works when blocks overlap visually in columns
                     className={`
                         relative mb-4 rounded-xl transition-all duration-200
-                        break-inside-avoid
                         ${isCategorySelected ? 'ring-2 ring-indigo-500 bg-indigo-50/10' : 'hover:bg-slate-50/50'}
                     `}
                     style={{ 
@@ -188,21 +187,29 @@ export const MenuPage: React.FC<MenuPageProps> = ({
                     return (
                         <div 
                             key={img.id || imgIdx}
-                            className={`absolute group cursor-move ${isFront ? 'z-20' : 'z-0'}`}
+                            className={`absolute group cursor-move`}
                             style={{ 
                                 left: `${img.x}px`, 
                                 top: `${img.y}px`, 
                                 width: `${img.width}px`,
+                                zIndex: img.zIndex ?? (isFront ? 20 : 0),
                                 touchAction: 'none'
                             }}
-                            onPointerDown={(e) => handlers.handleImageDragStart(e, img.id)}
+                            onPointerDown={(e) => handlers.handleDragImageStart(e, img.id)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handlers.handleSelection('addedImage', img.id);
+                            }}
                         >
-                            <img src={img.url} alt="added" className={`w-full h-auto pointer-events-none select-none ${isSelected ? 'ring-2 ring-indigo-500' : ''}`} />
+                            <img src={img.url} className={`w-full h-auto object-contain pointer-events-none ${isSelected ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}`} alt="" />
                             {isSelected && (
-                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white shadow-lg rounded-full flex gap-1 p-1 z-50">
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center bg-white border border-slate-200 shadow-xl rounded-lg p-1 animate-fade-in z-50">
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleLayerImage?.(img.id, -10)} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Send to Back"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button>
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleLayerImage?.(img.id, 20)} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Bring to Front"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m17 9-5-5-5 5"/><path d="m17 15-5 5-5-5"/></svg></button>
+                                    <div className="w-px bg-slate-200 mx-1 h-4"></div>
                                     <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleResizeImage(e, img.id, -20)} className="p-1 hover:bg-slate-100 rounded text-slate-600"><Minus size={14}/></button>
                                     <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleResizeImage(e, img.id, 20)} className="p-1 hover:bg-slate-100 rounded text-slate-600"><Plus size={14}/></button>
-                                    <div className="w-px bg-slate-200 mx-1"></div>
+                                    <div className="w-px bg-slate-200 mx-1 h-4"></div>
                                     <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleRemoveImage(e, img.id)} className="p-1 hover:bg-red-50 rounded text-red-500"><Trash2 size={14}/></button>
                                 </div>
                             )}

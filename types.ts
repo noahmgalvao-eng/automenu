@@ -41,6 +41,7 @@ export interface AddedImage {
   y: number; // px relative to page
   width: number; // px
   pageIndex: number;
+  zIndex?: number;
 }
 
 export interface MenuStyle {

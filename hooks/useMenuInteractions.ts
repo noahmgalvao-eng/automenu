@@ -78,9 +78,10 @@ export const useMenuInteractions = (props: InteractionProps) => {
         // ...imageInteractions
         draggedImageId: imageInteractions.draggedImageId,
         setDraggedImageId: imageInteractions.setDraggedImageId,
-        handleImageDragStart: imageInteractions.handleImageDragStart,
+        handleDragImageStart: imageInteractions.handleDragImageStart,
         handleResizeImage: imageInteractions.handleResizeImage,
         handleRemoveImage: imageInteractions.handleRemoveImage,
+        handleLayerImage: imageInteractions.handleLayerImage,
 
         // ...draggableInteractions
         draggedItem: draggableInteractions.draggedItem,

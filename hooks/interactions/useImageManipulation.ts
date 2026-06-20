@@ -90,10 +90,26 @@ export const useImageManipulation = (
         handleSelection(null, null);
     };
 
+    const handleLayerImage = (imgId: string, zIndexChange: number) => {
+        if (onStyleUpdate) {
+            onStyleUpdate(prev => ({
+                ...prev,
+                addedImages: prev.addedImages?.map(img => {
+                    if (img.id === imgId) {
+                        return { ...img, zIndex: zIndexChange };
+                    }
+                    return img;
+                }),
+                name: 'Custom'
+            }));
+        }
+    };
+
     return {
         draggedImageId, setDraggedImageId,
-        handleImageDragStart,
+        handleDragImageStart: handleImageDragStart,
         handleResizeImage,
-        handleRemoveImage
+        handleRemoveImage,
+        handleLayerImage
     };
 };

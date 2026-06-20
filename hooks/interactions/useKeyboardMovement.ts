@@ -477,36 +477,69 @@ export const useKeyboardMovement = (
 
             let insertIndex = currentOrder.length;
             
+            let targetCategory: string | null = null;
+            let targetProductId: string | null = null;
+            let insertMode: 'after' | 'before' = 'after';
+
             if (draftItem.ceilingId) {
                const cProd = products.find(p => p.id === draftItem.ceilingId);
-               const cCat = cProd ? cProd.category : (currentOrder.includes(draftItem.ceilingId!) ? draftItem.ceilingId : null);
-               if (cCat) {
-                   const idx = currentOrder.indexOf(cCat);
-                   if (idx !== -1) insertIndex = idx;
-               }
+               targetCategory = cProd ? cProd.category : (currentOrder.includes(draftItem.ceilingId!) ? draftItem.ceilingId : null);
+               if (cProd) targetProductId = cProd.id;
+               insertMode = 'after';
             } else if (draftItem.floorId) {
                const fProd = products.find(p => p.id === draftItem.floorId);
-               const fCat = fProd ? fProd.category : (currentOrder.includes(draftItem.floorId!) ? draftItem.floorId : null);
-               if (fCat) {
-                   const idx = currentOrder.indexOf(fCat);
-                   if (idx !== -1) insertIndex = idx + 1;
-               }
+               targetCategory = fProd ? fProd.category : (currentOrder.includes(draftItem.floorId!) ? draftItem.floorId : null);
+               if (fProd) targetProductId = fProd.id;
+               insertMode = 'before';
             }
 
-            currentOrder.splice(insertIndex, 0, ghostCategoryName);
+            const categoryName = targetCategory || `${FREE_TEXT_PREFIX}${newId}`;
 
-            const newProdOrder = { ...(prev.customProductOrder || {}) };
-            newProdOrder[ghostCategoryName] = [newId];
-
-            return {
-                ...prev,
-                customCategoryOrder: currentOrder,
-                customProductOrder: newProdOrder,
-                name: 'Custom'
-            };
+            // If we're creating a NEW ghost category
+            if (categoryName.startsWith(FREE_TEXT_PREFIX)) {
+                 if (targetCategory === null) {
+                      currentOrder.push(categoryName);
+                 }
+                 const newProdOrder = { ...(prev.customProductOrder || {}) };
+                 newProdOrder[categoryName] = [newId];
+                 
+                 setTimeout(() => {
+                     onAddProduct(categoryName, undefined, true, newId, { customMarginTop: newItemMargin, name: text });
+                 }, 0);
+                 
+                 return { ...prev, customCategoryOrder: currentOrder, customProductOrder: newProdOrder, name: 'Custom' };
+            } else {
+                 // We are putting it INSIDE an existing category!
+                 const newProdOrder = { ...(prev.customProductOrder || {}) };
+                 const catProducts = groupedProducts[categoryName] || [];
+                 let currentProdOrder = newProdOrder[categoryName] ? [...newProdOrder[categoryName]] : catProducts.map(p => p.id);
+                 
+                 if (targetProductId) {
+                     const pIdx = currentProdOrder.indexOf(targetProductId);
+                     if (pIdx !== -1) {
+                         if (insertMode === 'after') currentProdOrder.splice(pIdx + 1, 0, newId);
+                         else currentProdOrder.splice(pIdx, 0, newId);
+                     } else {
+                         currentProdOrder.push(newId);
+                     }
+                 } else {
+                     if (insertMode === 'after') {
+                         currentProdOrder.unshift(newId);
+                     } else {
+                         currentProdOrder.unshift(newId);
+                     }
+                 }
+                 
+                 newProdOrder[categoryName] = currentProdOrder;
+                 
+                 setTimeout(() => {
+                     onAddProduct(categoryName, undefined, true, newId, { customMarginTop: newItemMargin, name: text });
+                 }, 0);
+                 
+                 return { ...prev, customProductOrder: newProdOrder, name: 'Custom' };
+            }
         });
 
-        onAddProduct(ghostCategoryName, undefined, true, newId, { customMarginTop: newItemMargin, name: text });
         setDraftItem(null);
     };
 
