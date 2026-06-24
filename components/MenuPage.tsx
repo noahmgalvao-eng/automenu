@@ -16,12 +16,12 @@ interface MenuPageProps {
     onDeletePage: (index: number) => void;
 }
 
-export const MenuPage: React.FC<MenuPageProps> = ({ 
-    pageIndex, 
-    pageContent, 
-    style, 
-    handlers, 
-    products, 
+export const MenuPage: React.FC<MenuPageProps> = ({
+    pageIndex,
+    pageContent,
+    style,
+    handlers,
+    products,
     needsOverlay,
     pageCount,
     onAddPage,
@@ -46,13 +46,13 @@ export const MenuPage: React.FC<MenuPageProps> = ({
 
     const renderPageContent = () => {
         const elements: React.ReactNode[] = [];
-        
+
         // 1. Render Main Header separately (usually top of page 1)
         const mainHeader = pageContent.find(i => i.type === 'main-header');
         if (mainHeader) {
             elements.push(<MenuItem key="main-header" item={mainHeader} idx={0} style={style} handlers={handlers} products={products} inGroup={false} />);
         }
-  
+
         // 2. Group Body Items into "Blocks" (Category Header + Products)
         // This solves the Orphan issue (break-inside-avoid) and the Group Selection issue.
         const bodyItems = pageContent.filter(i => i.type !== 'main-header');
@@ -94,9 +94,9 @@ export const MenuPage: React.FC<MenuPageProps> = ({
         // 3. Render Blocks
         const renderedBlocks = categoryBlocks.map((block, blkIdx) => {
             const isCategorySelected = handlers.selectedId === block.category;
-            
+
             return (
-                <div 
+                <div
                     key={`${block.category}-${blkIdx}`}
                     // CRITICAL: translateZ(0) fixes hit-testing in Webkit/Chrome multi-column layouts where hitboxes can drift
                     // z-index ensures hit-testing works when blocks overlap visually in columns
@@ -104,12 +104,12 @@ export const MenuPage: React.FC<MenuPageProps> = ({
                         relative mb-4 rounded-xl transition-all duration-200
                         ${isCategorySelected ? 'ring-2 ring-indigo-500 bg-indigo-50/10' : 'hover:bg-slate-50/50'}
                     `}
-                    style={{ 
+                    style={{
                         transform: 'translateZ(0)',
                         zIndex: 10,
                         position: 'relative',
                         // Ensure clicks pass through to container if not hitting text
-                    }} 
+                    }}
                     // CRITICAL: Clicking anywhere in the block selects the Category
                     onClick={(e) => {
                         e.stopPropagation();
@@ -119,45 +119,45 @@ export const MenuPage: React.FC<MenuPageProps> = ({
                     }}
                 >
                     {block.items.map((item, idx) => (
-                        <MenuItem 
-                            key={idx} 
-                            item={item} 
-                            idx={idx} 
-                            style={style} 
-                            handlers={handlers} 
-                            products={products} 
+                        <MenuItem
+                            key={idx}
+                            item={item}
+                            idx={idx}
+                            style={style}
+                            handlers={handlers}
+                            products={products}
                             inGroup={true} // Tells MenuItem to adjust padding/margins for inside-block
                         />
                     ))}
                 </div>
             );
         });
-  
+
         if (needsColumns) {
-             elements.push(
-                 <div key={`page-cols-${pageIndex}`} style={{ 
-                     columnCount: columnCount, 
-                     columnGap: '2rem',
-                     width: '100%',
-                     position: 'relative',
-                     zIndex: 1
-                 }}>
-                     {renderedBlocks}
-                 </div>
-             );
+            elements.push(
+                <div key={`page-cols-${pageIndex}`} style={{
+                    columnCount: columnCount,
+                    columnGap: '2rem',
+                    width: '100%',
+                    position: 'relative',
+                    zIndex: 1
+                }}>
+                    {renderedBlocks}
+                </div>
+            );
         } else {
-             elements.push(...renderedBlocks);
+            elements.push(...renderedBlocks);
         }
-  
+
         if (handlers.draftItem && handlers.draftItem.pageIndex === pageIndex) {
             elements.push(
                 <div key="draft-input" className="absolute left-0 right-0 z-50 px-8" style={{ top: `${handlers.draftItem.top}px` }}>
-                    <div 
-                        ref={handlers.draftInputRef} 
-                        contentEditable 
-                        suppressContentEditableWarning 
-                        onBlur={handlers.handleDraftCommit} 
-                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlers.handleDraftCommit(); } }} 
+                    <div
+                        ref={handlers.draftInputRef}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={handlers.handleDraftCommit}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlers.handleDraftCommit(); } }}
                         className="bg-white ring-2 ring-blue-500 rounded p-1 font-normal text-xl leading-snug outline-none shadow-xl min-h-[30px] border border-blue-200 text-blue-900"
                     >
                         New Text
@@ -171,26 +171,26 @@ export const MenuPage: React.FC<MenuPageProps> = ({
 
     return (
         <div className="relative flex-shrink-0">
-            <div 
-                data-page-index={pageIndex} 
-                style={pageStyle} 
-                className={`shadow-2xl bg-white print:shadow-none print:mb-0 print:break-after-page group/page transition-all ${isPageSelected ? 'ring-4 ring-blue-500' : ''}`} 
+            <div
+                data-page-index={pageIndex}
+                style={pageStyle}
+                className={`shadow-2xl bg-white print:shadow-none print:mb-0 print:break-after-page group/page transition-all ${isPageSelected ? 'ring-4 ring-blue-500' : ''}`}
                 onClick={(e) => { e.stopPropagation(); handlers.setSelectedPageIndex(pageIndex); handlers.setSelectedId(null); handlers.handleSelection(null, null); handlers.setEditingId(null); }}
                 onDoubleClick={(e) => handlers.handlePageDoubleClick(e, pageIndex)}
             >
-                {needsOverlay && ( <div className="absolute inset-0 bg-white/90 pointer-events-none z-0" /> )}
-                
-                {(style.addedImages || []).filter(img => img && img.id && (img.pageIndex || 0) === pageIndex).map((img, imgIdx) => { 
+                {needsOverlay && (<div className="absolute inset-0 bg-white/90 pointer-events-none z-0" />)}
+
+                {(style.addedImages || []).filter(img => img && img.id && (img.pageIndex || 0) === pageIndex).map((img, imgIdx) => {
                     const isSelected = handlers.selectedId === img.id;
                     const isFront = isPageSelected || isSelected;
-                    
+
                     return (
-                        <div 
+                        <div
                             key={img.id || imgIdx}
                             className={`absolute group cursor-move`}
-                            style={{ 
-                                left: `${img.x}px`, 
-                                top: `${img.y}px`, 
+                            style={{
+                                left: `${img.x}px`,
+                                top: `${img.y}px`,
                                 width: `${img.width}px`,
                                 zIndex: img.zIndex ?? (isFront ? 20 : 0),
                                 touchAction: 'none'
@@ -204,54 +204,54 @@ export const MenuPage: React.FC<MenuPageProps> = ({
                             <img src={img.url} className={`w-full h-auto object-contain pointer-events-none ${isSelected ? 'ring-2 ring-indigo-500 ring-offset-2' : ''}`} alt="" />
                             {isSelected && (
                                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center bg-white border border-slate-200 shadow-xl rounded-lg p-1 animate-fade-in z-50">
-                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleLayerImage?.(img.id, -10)} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Send to Back"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></button>
-                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleLayerImage?.(img.id, 20)} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Bring to Front"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m17 9-5-5-5 5"/><path d="m17 15-5 5-5-5"/></svg></button>
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleLayerImage?.(img.id, -10)} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Send to Back"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" /></svg></button>
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleLayerImage?.(img.id, 20)} className="p-1 hover:bg-slate-100 rounded text-slate-600" title="Bring to Front"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m17 9-5-5-5 5" /><path d="m17 15-5 5-5-5" /></svg></button>
                                     <div className="w-px bg-slate-200 mx-1 h-4"></div>
-                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleResizeImage(e, img.id, -20)} className="p-1 hover:bg-slate-100 rounded text-slate-600"><Minus size={14}/></button>
-                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleResizeImage(e, img.id, 20)} className="p-1 hover:bg-slate-100 rounded text-slate-600"><Plus size={14}/></button>
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleResizeImage(e, img.id, -20)} className="p-1 hover:bg-slate-100 rounded text-slate-600"><Minus size={14} /></button>
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleResizeImage(e, img.id, 20)} className="p-1 hover:bg-slate-100 rounded text-slate-600"><Plus size={14} /></button>
                                     <div className="w-px bg-slate-200 mx-1 h-4"></div>
-                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleRemoveImage(e, img.id)} className="p-1 hover:bg-red-50 rounded text-red-500"><Trash2 size={14}/></button>
+                                    <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => handlers.handleRemoveImage(e, img.id)} className="p-1 hover:bg-red-50 rounded text-red-500"><Trash2 size={14} /></button>
                                 </div>
                             )}
                         </div>
                     )
                 })}
-                
-                <div 
-                    className="relative z-10 h-full flex flex-col" 
+
+                <div
+                    className="relative z-10 h-full flex flex-col"
                     style={{ padding: `${style.pagePadding || 48}px` }}
-                > 
-                    {renderPageContent()} 
+                >
+                    {renderPageContent()}
                 </div>
-                
+
                 <div className="absolute bottom-4 left-0 right-0 text-center text-xs opacity-40 pointer-events-none"> {pageIndex + 1} </div>
             </div>
             {isPageSelected && (
                 <>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); onAddPage(pageIndex, 'after'); }} 
-                        className="absolute right-[-32px] top-1/2 -translate-y-1/2 translate-x-1/2 z-30 p-2 bg-blue-600 rounded-full shadow-lg text-white hover:bg-blue-700 hover:scale-110 transition-all border-2 border-white" 
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onAddPage(pageIndex, 'after'); }}
+                        className="absolute right-[-32px] top-1/2 -translate-y-1/2 translate-x-1/2 z-30 p-2 bg-blue-600 rounded-full shadow-lg text-white hover:bg-blue-700 hover:scale-110 transition-all border-2 border-white"
                         title="Add Page After"
-                    > 
-                        <Plus size={24} /> 
+                    >
+                        <Plus size={24} />
                     </button>
-                    {pageIndex > 0 && ( 
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); onAddPage(pageIndex, 'before'); }} 
-                            className="absolute left-[-32px] top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 p-2 bg-blue-600 rounded-full shadow-lg text-white hover:bg-blue-700 hover:scale-110 transition-all border-2 border-white" 
+                    {pageIndex > 0 && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onAddPage(pageIndex, 'before'); }}
+                            className="absolute left-[-32px] top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 p-2 bg-blue-600 rounded-full shadow-lg text-white hover:bg-blue-700 hover:scale-110 transition-all border-2 border-white"
                             title="Add Page Before"
-                        > 
-                            <Plus size={24} /> 
-                        </button> 
+                        >
+                            <Plus size={24} />
+                        </button>
                     )}
-                    {pageCount > 1 && pageIndex !== 0 && ( 
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); onDeletePage(pageIndex); }} 
-                            className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 z-30 p-2 bg-red-600 rounded-full shadow-lg text-white hover:bg-red-700 hover:scale-110 transition-all border-2 border-white" 
+                    {pageCount > 1 && pageIndex !== 0 && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onDeletePage(pageIndex); }}
+                            className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 z-30 p-2 bg-red-600 rounded-full shadow-lg text-white hover:bg-red-700 hover:scale-110 transition-all border-2 border-white"
                             title="Delete Page"
-                        > 
-                            <Trash2 size={20} /> 
-                        </button> 
+                        >
+                            <Trash2 size={20} />
+                        </button>
                     )}
                 </>
             )}
